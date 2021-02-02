@@ -123,6 +123,8 @@ class Provider(AddressProvider):
         """
         return self.canton()[1]
 
+    administrative_unit = canton_name
+
     def canton_code(self):
         """
         Randomly returns a Swiss canton code.

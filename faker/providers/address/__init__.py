@@ -82,3 +82,37 @@ class Provider(BaseProvider):
             return self.random_element(self.alpha_3_country_codes)
         else:
             raise ValueError("`representation` must be one of `alpha-2` or `alpha-3`.")
+
+    def administrative_unit(self):
+        for name in ["province", "region", "state", "prefecture", "county", ]:
+            method = getattr(self, name, None)
+            if method:
+                return method()
+        raise AttributeError(f"No state or other high level administrative unit found for this locale: {self.__class__.__module__}")
+
+    def current_country_code(self):
+        try:
+            return self.__lang__.split("_")[1]
+        except IndexError:
+            raise AttributeError("Country code cannot be determmined from locale")
+
+    def current_country(self):
+        try:
+            current_country_code = self.current_country_code()
+        except AttributeError:
+            return "No Country"
+        current_country = [tz['name'] for tz in date_time.Provider.countries if tz['alpha-2-code'] == current_country_code]
+        if len(current_country) == 1:
+            return current_country[0]
+        elif len(current_country)>1:
+            raise ValueError(f"Ambiguous country for country code {current_country_code}: {current_country}")
+        elif current_country_code == "AA":
+            return "No Country"
+        elif current_country_code == "PS":
+            return "Palestine"
+        elif current_country_code == "TW":
+            return "Taiwan"
+        elif current_country_code == "QC":
+            return "Canada"
+        else:
+            raise ValueError(f"No appropriate country for country code {current_country_code}")

@@ -4,6 +4,8 @@ from unittest import mock
 
 import pytest
 
+from faker import providers, Faker
+
 from faker.providers.address.cs_CZ import Provider as CsCzAddressProvider
 from faker.providers.address.da_DK import Provider as DaDkAddressProvider
 from faker.providers.address.de_AT import Provider as DeAtAddressProvider
@@ -63,6 +65,35 @@ class TestBaseProvider:
         for _ in range(num_samples):
             with pytest.raises(ValueError):
                 faker.country_code(representation='hello')
+
+    def _collect_fakers_for_locales(self):
+        cached_locales  = []
+        language_locale_codes = providers.BaseProvider.language_locale_codes
+        errors = []
+        for code, countries in language_locale_codes.items():
+            for country in countries:
+                name = f"{code}_{country}"
+                try:
+                    faker = Faker(name)
+                    cached_locales.append(faker)
+                except AttributeError as e:
+                    print(f"Cannot generate faker for {name}: {e}. Skipped")
+
+        return cached_locales
+
+    def _fakers_for_locales(self):
+        if not hasattr(self.__class__, "cached_locales"):
+            self.__class__.cached_locales = self._collect_fakers_for_locales()
+        return self.cached_locales
+
+    def test_administrative_unit_all_locales(self):
+        for faker in self._fakers_for_locales():
+            if faker.current_country_code() not in ["IL", "GE", "TW"]:
+                assert isinstance(faker.administrative_unit(), str)
+
+    def test_country_code_all_locales(self):
+        for faker in self._fakers_for_locales():
+            assert isinstance(faker.current_country_name(), str)
 
 
 class TestCsCz:

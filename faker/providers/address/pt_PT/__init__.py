@@ -405,6 +405,8 @@ class Provider(AddressProvider):
         """
         return self.random_element(self.distritos)
 
+    administrative_unit = distrito
+
     def concelho(self):
         """
         :example 'Tondela'

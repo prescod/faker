@@ -168,3 +168,6 @@ class Provider(AddressProvider):
 
     def street_title(self):
         return self.random_element(self.street_titles)
+
+    def administrative_unit(self):
+        return ''
